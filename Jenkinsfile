@@ -1,12 +1,19 @@
 pipeline {
     agent any
 
+    options {
+        skipDefaultCheckout()
+    }
+
     stages {
-        stage('Clonage') {
+
+        stage('Checkout') {
             steps {
-                git 'https://github.com/sissor-nagi/mon_projet.git'
+                checkout scm
             }
         }
+
+    stages {
 
         stage('Build + Tests + Sécurité') {
             steps {
