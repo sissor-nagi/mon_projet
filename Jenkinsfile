@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    options {
-        skipDefaultCheckout()
-    }
-
     stages {
 
         stage('Checkout') {
@@ -12,8 +8,6 @@ pipeline {
                 checkout scm
             }
         }
-
-    stages {
 
         stage('Build + Tests + Sécurité') {
             steps {
