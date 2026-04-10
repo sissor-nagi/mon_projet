@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    options {
+        skipDefaultCheckout()
+    }
+
     stages {
 
         stage('Checkout') {
@@ -12,13 +16,26 @@ pipeline {
         stage('Build + Tests + Sécurité') {
             steps {
                 sh '''
+                # Nettoyage workspace + venv
+                rm -rf venv
+
+                # Création environnement virtuel propre
                 python3 -m venv venv
-                venv/bin/pip install --upgrade pip
-                venv/bin/pip install -r requirements.txt
-                venv/bin/pytest tests/
-                venv/bin/pip install bandit safety
-                venv/bin/bandit -r src/ -ll
-                venv/bin/safety check
+                chmod -R 755 venv
+
+                # Mise à jour pip (IMPORTANT: via python)
+                venv/bin/python -m pip install --upgrade pip
+
+                # Installation dépendances
+                venv/bin/python -m pip install -r requirements.txt
+
+                # Tests
+                venv/bin/python -m pytest tests/
+
+                # Analyse sécurité
+                venv/bin/python -m pip install bandit safety
+                venv/bin/python -m bandit -r src -ll
+                venv/bin/python -m safety check
                 '''
             }
         }
@@ -36,6 +53,9 @@ pipeline {
         }
         failure {
             echo "Pipeline échoué"
+        }
+        always {
+            echo "Fin du pipeline"
         }
     }
 }
