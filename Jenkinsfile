@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    options {
-        skipDefaultCheckout()
-    }
-
     stages {
 
         stage('Checkout') {
@@ -16,24 +12,26 @@ pipeline {
         stage('Build + Tests + Sécurité') {
             steps {
                 sh '''
-                # Nettoyage workspace + venv
+                # Nettoyage ancien environnement
                 rm -rf venv
 
-                # Création environnement virtuel propre
+                # Création venv propre
                 python3 -m venv venv
-                chmod -R 755 venv
 
-                # Mise à jour pip (IMPORTANT: via python)
+                # Sécurisation pip (IMPORTANT pour Jenkins)
+                venv/bin/python -m ensurepip --upgrade || true
                 venv/bin/python -m pip install --upgrade pip
 
-                # Installation dépendances
+                # Installation dépendances projet
                 venv/bin/python -m pip install -r requirements.txt
 
-                # Tests
+                # Tests unitaires
                 venv/bin/python -m pytest tests/
 
-                # Analyse sécurité
+                # Outils sécurité
                 venv/bin/python -m pip install bandit safety
+
+                # Analyse sécurité code
                 venv/bin/python -m bandit -r src -ll
                 venv/bin/python -m safety check
                 '''
@@ -42,7 +40,9 @@ pipeline {
 
         stage('Nettoyage') {
             steps {
-                sh 'rm -rf venv'
+                sh '''
+                rm -rf venv
+                '''
             }
         }
     }
