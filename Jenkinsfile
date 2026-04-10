@@ -12,13 +12,13 @@ pipeline {
         stage('Build + Tests + Sécurité') {
             steps {
                 sh '''
-                # Nettoyage ancien environnement
+                # Nettoyage workspace
                 rm -rf venv
 
-                # Création venv propre
+                # Création environnement virtuel
                 python3 -m venv venv
 
-                # Sécurisation pip (IMPORTANT pour Jenkins)
+                # IMPORTANT : activer pip proprement (évite ton erreur)
                 venv/bin/python -m ensurepip --upgrade || true
                 venv/bin/python -m pip install --upgrade pip
 
